@@ -45,3 +45,18 @@ Every claim Wilson makes about itself, and how it is evidenced. `tests/test_clai
 - Responsibly = V8/data boundary (WIL-D3 is the open violation), V7 disclosure, and the privacy-flag behavior.
 
 A claim with no test in this file and no row above does not get published in README, docs, reports, or posts.
+
+## Hostile code sweep (16 Nov 26, GLM-4.6 + DeepSeek-V3, per-file chunks)
+
+Adjudicated against live code; noise rejected (SSRF-on-hardcoded-URL, CSV path traversal via DataFrame equality, health-mask and None-name crash claims were false). Confirmed findings fixed same day on `release-prep`:
+
+| Fix | Finding |
+|---|---|
+| Commit "input bounds and exposure defaults" | Batch endpoint accepted unbounded citation lists; report endpoint accepted any string as the forensic SHA-256 and any string as filename (header-injection crash). Now: max 500 batch entries, `^[0-9a-fA-F]{64}$` hash, sanitized filename. Tests in TestInputBoundaries. |
+| Same commit | Install docs instructed `--host 0.0.0.0`: this tool has no auth; anyone reaching the port can read your token. Docs now default to 127.0.0.1 with an explicit exposure warning. |
+| Same commit | Setup scripts echoed the CourtListener token to the console; now masked (`read -rs`, SecureString). |
+| Same commit | Windows uninstaller killed every `python` process on the machine; now scoped to Wilson's own interpreter path. |
+
+Re-checked and found already-correct (sweep claims rejected): fail-closed ERROR verdicts on API/auth failure (proven by V2), case-name default guards, CSV lookup is in-memory equality.
+
+Deferred to Linear (low severity, single-user local context): `.env` concurrent-write race; undisclosed opinion truncation in Phase 3 context; prose-fallback verdict extraction labeling; bulk CSV download lacks checksum verification; proposition-suggestion fallback should be labeled LOW confidence.

@@ -156,7 +156,7 @@ Filename: "{app}\Wilson.bat"; \
 
 [UninstallRun]
 Filename: "powershell.exe"; \
-  Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force"""; \
+  Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Get-Process python -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '{app}\python\*' } | Stop-Process -Force"""; \
   RunOnceId: "KillWilson"; \
   Flags: runhidden waituntilterminated
 

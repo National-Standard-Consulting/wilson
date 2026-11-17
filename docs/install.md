@@ -34,7 +34,12 @@ chmod +x setup.sh
 
 ```bash
 source venv/bin/activate
-uvicorn api:app --host 0.0.0.0 --port 8000
+uvicorn api:app --host 127.0.0.1 --port 8000
+
+Wilson has no authentication layer: anyone who can reach the port can read
+and change your API token and run verifications. Keep it on 127.0.0.1.
+Only use `--host 0.0.0.0` on a network you fully control, and understand
+what that exposes.
 ```
 
 ## Manual setup
@@ -46,7 +51,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env   # then edit .env and add your CourtListener token
-uvicorn api:app --host 0.0.0.0 --port 8000
+uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
 ## Python version notes

@@ -116,7 +116,9 @@ if (-not $tokenValue -or $tokenValue -eq "your_courtlistener_token_here") {
     Write-Warn "CourtListener API token required for Wilson to function."
     Write-Info "Get yours free at: https://www.courtlistener.com/sign-in/"
     Write-Host ""
-    $input = Read-Host "  Enter your CourtListener API token (or press Enter to skip)"
+    $secure = Read-Host "  Enter your CourtListener API token (or press Enter to skip)" -AsSecureString
+    $input = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+        [Runtime.InteropServices.Marshal]::SecureStringToGlobalAllocUnicode($secure))
     if ($input.Trim()) {
         $envContent = $envContent -replace "COURTLISTENER_TOKEN=.*", "COURTLISTENER_TOKEN=$($input.Trim())"
         Set-Content $ENV_FILE $envContent -NoNewline

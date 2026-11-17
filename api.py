@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import requests as http_requests
 
@@ -249,7 +249,7 @@ class BatchPropositionsRequest(BaseModel):
 
 
 class BatchStreamRequest(BaseModel):
-    citations: list[dict]
+    citations: list[dict] = Field(max_length=500)
     depth: str
 
 
@@ -987,10 +987,10 @@ async def batch_stream(request: BatchStreamRequest):
 # ------------------------------------------------------------------------------
 
 class ReportRequest(BaseModel):
-    filename: str
-    sha256: str
-    page_count: int
-    citations: list[dict]  # each entry has citation_text, phase1_verdict, etc.
+    filename: str = Field(max_length=200, pattern=r"^[^/\\\r\n\"]+$")
+    sha256: str = Field(pattern=r"^[0-9a-fA-F]{64}$")
+    page_count: int = Field(ge=0)
+    citations: list[dict] = Field(max_length=2000)  # each entry has citation_text, phase1_verdict, etc.
 
 
 @app.post("/report/generate")

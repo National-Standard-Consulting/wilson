@@ -333,3 +333,29 @@ class TestHealthClaims:
         h = client.get("/health").json()
         assert "available" in h["phases"]["phase1_api"]
         assert h["phases"]["phase3"]["available"] is False
+
+
+# ================================================ Input boundary (audit sweep)
+
+class TestInputBoundaries:
+    """Hostile-sweep follow-ups: unbounded or unvalidated client input on the
+    report/batch surface, and a no-auth localhost tool's exposure defaults."""
+
+    def test_batch_rejects_absurd_citation_count(self):
+        r = client.post("/batch/stream",
+                        json={"citations": [{"citation_text": f"x {i}"} for i in range(501)],
+                              "depth": "full"})
+        assert r.status_code == 422
+
+    def test_report_requires_real_sha256_shape(self):
+        req = {"filename": "brief.pdf", "sha256": "trust-me", "page_count": 1,
+               "citations": [{"citation_text": ROE}]}
+        r = client.post("/report/generate", json=req)
+        assert r.status_code == 422, "forged hash shape accepted into forensic report"
+
+    def test_report_rejects_header_injection_in_filename(self):
+        req = {"filename": 'x.txt\r\nX-Evil: 1', "sha256": "a" * 64, "page_count": 1,
+               "citations": [{"citation_text": ROE}]}
+        r = client.post("/report/generate", json=req)
+        assert r.status_code == 422
+        assert "x-evil" not in str(r.headers).lower()
