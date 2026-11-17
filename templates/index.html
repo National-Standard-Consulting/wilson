@@ -909,6 +909,25 @@
         loadSettingsValues();
     }
 
+    function setEmbeddingsFallback(enabled) {
+        const status = document.getElementById('s-embed-fallback-status');
+        if (enabled && !confirm('This sends your proposition text to CourtListener whenever the local model is down. Continue?')) {
+            document.getElementById('s-embed-fallback').checked = false;
+            return;
+        }
+        fetch('/settings/embeddings-fallback', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({enabled: enabled})
+        })
+        .then(r => r.json())
+        .then(d => { status.textContent = enabled
+            ? (d.enabled ? 'Fallback ENABLED -- propositions go to CourtListener when Ollama is down.'
+                         : 'NOT saved to .env (effective for this session only).')
+            : 'Fallback OFF -- only citation strings leave this machine.'; })
+        .catch(() => { status.textContent = 'Failed to update setting.'; });
+    }
+
     function closeSettings() {
         document.getElementById('settings-drawer').style.right = '-340px';
         document.getElementById('settings-overlay').style.display = 'none';
@@ -988,6 +1007,11 @@
                         : 'CSV configured';
                 } else {
                     el.textContent = 'No CSV configured';
+                }
+                // Embeddings-fallback opt-in state (WIL-D3)
+                const ef = document.getElementById('s-embed-fallback');
+                if (ef && data.phases && data.phases.phase3) {
+                    ef.checked = !!data.phases.phase3.embeddings_fallback_opt_in;
                 }
                 // CSV update status
                 const upd = document.getElementById('s-csv-update');
@@ -1237,6 +1261,18 @@
             </div>
             <div id="s-cl-status" style="font-size:0.78rem;margin-top:0.25rem;
                                           color:var(--text-muted);"></div>
+        </div>
+
+        <div style="margin-bottom:0.75rem;">
+            <label style="display:flex;gap:0.5rem;align-items:flex-start;color:var(--text-muted);font-size:0.8rem;">
+                <input type="checkbox" id="s-embed-fallback" onchange="setEmbeddingsFallback(this.checked)"
+                       style="margin-top:0.2rem;">
+                <span>Semantic-search fallback. When the local model is down, send
+                proposition text to CourtListener semantic search. Default: OFF.
+                Enabling this means document-derived text leaves this machine.</span>
+            </label>
+            <div id="s-embed-fallback-status" style="font-size:0.78rem;margin-top:0.25rem;
+                                                      color:var(--text-muted);"></div>
         </div>
     </div>
 

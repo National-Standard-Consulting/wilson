@@ -234,16 +234,20 @@ class TestPhase3Claims:
     def test_both_backends_down_degrades_to_skipped(self, world):
         """Responsibility claim: with no coherence backend the verdict is SKIPPED,
         never a substantive answer invented from nothing."""
-        world(standard_routes(ollama_down=True))  # semantic search returns no results
+        world(standard_routes(ollama_down=True, semantic_clusters=[111170]))
         out = verify(ROE, prop=TRUE_PROP)
         assert out["phase3"]["verdict"] == "SKIPPED"
+        assert "OFF by default" in out["phase3"]["reasoning"]
+        assert out["phase3"]["backend_used"] is None
 
-    def test_semantic_rank_fallback_discloses_backend(self, world):
+    def test_semantic_rank_fallback_discloses_backend(self, world, monkeypatch):
+        monkeypatch.setenv("WILSON_EMBEDDINGS_FALLBACK", "1")  # WIL-D3: opt-in
         world(standard_routes(ollama_down=True, semantic_clusters=[111170, 9, 8]))
         out = verify(ROE, prop=TRUE_PROP)
         assert out["phase3"]["backend_used"] == "embeddings"
         assert out["phase3"]["verdict"] == "SUPPORTS"  # rank #1 of 3
         assert "not full opinion analysis" in out["phase3"]["reasoning"]
+        assert "CourtListener semantic search" in out["phase3"]["reasoning"]  # boundary note
 
 
 # ============================================================ Data boundary
@@ -259,16 +263,24 @@ class TestDataBoundaryClaims:
             assert TRUE_PROP not in blob, f"proposition leaked to CourtListener at {call['url']}"
             assert REAL_QUOTE not in blob, f"quote leaked to CourtListener at {call['url']}"
 
-    @pytest.mark.xfail(strict=True, reason="DEFECT WIL-D3: embeddings fallback PUTS THE PROPOSITION "
-                       "ITSELF into CourtListener semantic search (q param) while the report footer "
-                       "and docs claim document content never left the machine. Fix: opt-in + honest "
-                       "footer. Linear: file ticket.")
-    def test_no_document_derived_text_leaves_machine_on_any_path(self, world):
+    def test_default_no_document_derived_text_leaves_machine_on_any_path(self, world, monkeypatch):
+        """WIL-D3 fixed (opt-in, default off): with Ollama down and the fallback
+        available, the DEFAULT world sends nothing but citation strings."""
+        monkeypatch.delenv("WILSON_EMBEDDINGS_FALLBACK", raising=False)
         net = world(standard_routes(ollama_down=True, semantic_clusters=[111170]))
-        verify(ROE, prop=TRUE_PROP)
+        out = verify(ROE, prop=TRUE_PROP)
+        assert out["phase3"]["verdict"] == "SKIPPED"
         for call in cl_calls(net):
             blob = json.dumps(call, default=str)
-            assert TRUE_PROP not in blob, "proposition text left the machine via semantic fallback"
+            assert TRUE_PROP not in blob, "proposition text left the machine without opt-in"
+
+    def test_opt_in_sends_proposition_and_says_so(self, world, monkeypatch):
+        """The opt-in path is by design, and every verdict on it discloses the crossing."""
+        monkeypatch.setenv("WILSON_EMBEDDINGS_FALLBACK", "1")
+        world(standard_routes(ollama_down=True, semantic_clusters=[111170]))
+        out = verify(ROE, prop=TRUE_PROP)
+        assert out["phase3"]["backend_used"] == "embeddings"
+        assert "sent" in out["phase3"]["reasoning"] and "CourtListener" in out["phase3"]["reasoning"]
 
 
 # ========================================================== Report integrity
@@ -341,6 +353,7 @@ class TestHealthClaims:
         h = client.get("/health").json()
         assert "available" in h["phases"]["phase1_api"]
         assert h["phases"]["phase3"]["available"] is False
+        assert h["phases"]["phase3"]["embeddings_fallback_opt_in"] is False
 
 
 # ================================================ Input boundary (audit sweep)

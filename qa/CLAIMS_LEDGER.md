@@ -24,7 +24,7 @@ Every claim Wilson makes about itself, and how it is evidenced. `tests/test_clai
 |---|---|---|
 | ~~WIL-D1~~ | **FIXED 17 Nov** (defect-wil-d1-d2): unchecked quote now displays UNVERIFIED; test promoted from xfail to strict pass. |  |
 | ~~WIL-D2~~ | **FIXED 17 Nov** (defect-wil-d1-d2): bare coordinates are now EXISTS with a disclosed "no case name supplied" note; name comparison runs only when a name claim exists. |  |
-| WIL-D3 | "Document content never left this machine" | The Phase 3 embeddings fallback sends the proposition itself to CourtListener semantic search. The report footer and privacy docs are false on that path. Fix = opt-in fallback + honest footer (product decision pending). |
+| ~~WIL-D3~~ | **FIXED 17 Nov** (CY decision: opt-in). Semantic fallback is default OFF: Phase 3 is SKIPPED when Ollama is down, with reasoning that explains the boundary. Opt-in via Settings toggle (confirm-guarded) or `WILSON_EMBEDDINGS_FALLBACK=1`; opted-in verdicts carry an explicit boundary-crossing note. Docs + report footer rewritten. |  |
 | ~~WIL-D4~~ | **FIXED 17 Nov** (defect-d4-d6-minors): report rows and the batch UI disclose the Phase 3 backend (embeddings and prose-fallback carry explicit weaker-evidence wording); xfail promoted. |  |
 | WIL-D5 | Batch depth "quotes" | `/batch/stream` always passes `quoted_text=None`: batch quote verification is a no-op label. Docs corrected 16 Nov; code needs the feature or the option removed. |
 | ~~WIL-D6~~ | **FIXED 17 Nov** (defect-d4-d6-minors): Phase 3 options now temperature 0.0 + seed 1234; test asserts the sampling config. |  |

@@ -42,7 +42,7 @@ from eyecite import get_citations
 from rapidfuzz import fuzz
 
 from quote_verify import verify_quote
-from coherence_check import check_coherence, coherence_available
+from coherence_check import check_coherence, coherence_available, embeddings_fallback_enabled
 
 load_dotenv()
 
@@ -732,7 +732,8 @@ async def health():
             "phase3": {
                 "available": llm_available,
                 "description": "Coherence checking via local LLM",
-                "message": llm_message
+                "message": llm_message,
+                "embeddings_fallback_opt_in": embeddings_fallback_enabled()
             }
         },
         "csv_update": {
@@ -880,6 +881,26 @@ async def update_courtlistener_token(request: CourtListenerTokenRequest):
         write_env_value("COURTLISTENER_TOKEN", request.token)
 
     return {"success": True, "valid": valid}
+
+
+class EmbeddingsFallbackRequest(BaseModel):
+    enabled: bool
+
+
+@app.post("/settings/embeddings-fallback")
+async def update_embeddings_fallback(request: EmbeddingsFallbackRequest):
+    """
+    Opt in/out of the Phase 3 semantic-search fallback (WIL-D3).
+
+    When enabled, proposition text -- document-derived -- is sent to
+    CourtListener semantic search when the local model is down.
+    Default OFF: without opt-in, only citation strings ever leave the machine.
+    """
+    import coherence_check
+    value = "1" if request.enabled else "0"
+    os.environ["WILSON_EMBEDDINGS_FALLBACK"] = value
+    ok = write_env_value("WILSON_EMBEDDINGS_FALLBACK", value)
+    return {"success": ok, "enabled": coherence_check.embeddings_fallback_enabled()}
 
 
 @app.post("/verify/stream")

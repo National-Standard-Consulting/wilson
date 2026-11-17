@@ -74,6 +74,12 @@ def coherence_available():
         return False, "Ollama check failed due to an internal error."
 
 
+def embeddings_fallback_enabled() -> bool:
+    """WIL-D3: the embeddings fallback sends the proposition text to CourtListener.
+    That is document-derived text, so the fallback is strictly opt-in, default off."""
+    return os.getenv("WILSON_EMBEDDINGS_FALLBACK", "0").strip().lower() in ("1", "true", "yes", "on")
+
+
 def check_coherence_embeddings(proposition, cluster_id):
     """
     Phase 3 fallback: use CourtListener semantic search to assess coherence.
@@ -324,15 +330,38 @@ def check_coherence(proposition, case_name, cluster_id, opinion_text=None):
     # Try Ollama first
     available, availability_message = coherence_available()
     if not available:
-        print(f"  [COHERENCE] Ollama unavailable ({availability_message}) -- trying embeddings fallback...")
-        result = check_coherence_embeddings(proposition, cluster_id)
-        result["thinking"] = None
-        if result["verdict"] == "SKIPPED":
-            result["reasoning"] = (
-                f"Phase 3 skipped -- Ollama unavailable and embeddings fallback also failed. "
-                f"Ollama: {availability_message}. Embeddings: {result['reasoning']}"
-            )
-        return result
+        # WIL-D3 (CY decision 17 Nov 26): the semantic-search fallback transmits
+        # the proposition -- document-derived text -- to CourtListener. It is
+        # therefore opt-in with default OFF. Without opt-in, the data boundary
+        # is absolute: only citation strings leave the machine.
+        if embeddings_fallback_enabled():
+            print(f"  [COHERENCE] Ollama unavailable ({availability_message}) -- "
+                  f"using OPT-IN embeddings fallback (proposition text will be sent to CourtListener)...")
+            result = check_coherence_embeddings(proposition, cluster_id)
+            result["thinking"] = None
+            if result.get("backend_used") == "embeddings" and result["verdict"] != "SKIPPED":
+                result["reasoning"] = (result.get("reasoning") or "") + (
+                    " NOTE: the opt-in semantic-search fallback sent this proposition's text "
+                    "to CourtListener semantic search (data boundary crossed by your explicit setting)."
+                )
+            elif result["verdict"] == "SKIPPED":
+                result["reasoning"] = (
+                    f"Phase 3 skipped -- Ollama unavailable and the opt-in embeddings "
+                    f"fallback also failed. Ollama: {availability_message}. "
+                    f"Embeddings: {result['reasoning']}"
+                )
+            return result
+        return {
+            "verdict": "SKIPPED",
+            "confidence": None,
+            "reasoning": (
+                f"Phase 3 skipped -- Ollama unavailable ({availability_message}). The "
+                f"semantic-search fallback is OFF by default because it would send your "
+                f"proposition text to CourtListener; enable it in Settings if that trade "
+                f"is acceptable to you. No document-derived text left this machine."
+            ),
+            "backend_used": None
+        }
 
     if opinion_text is None:
         print(f"  [COHERENCE] Fetching opinion for cluster {cluster_id}...")
