@@ -1,0 +1,13 @@
+# Gate configuration only (CI: .github/workflows/quality-gates.yml).
+# Wilson ships via requirements.txt + installer; this file is NOT a build system.
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+extend-exclude = [".venv", "venv", "__pycache__", "data", "installer"]
+
+[tool.ruff.lint]
+# Deliberately narrow: syntax-level pycodestyle + pyflakes (the Nautilus
+# NAT-475 baseline philosophy). The enforceable rule is the changed-lines
+# ratchet in scripts/lint_gate.py; full-tree output is baseline reporting.
+select = ["E4", "E7", "E9", "F"]
