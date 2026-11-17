@@ -4,7 +4,7 @@
 # Sets up Wilson on Windows with PowerShell 5.1 or later.
 # Run once after cloning the repo:
 #
-#   git clone https://github.com/CYoung83/wilson.git
+#   git clone https://github.com/National-Standard-Consulting/wilson.git
 #   cd wilson
 #   Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 #   .\setup.ps1

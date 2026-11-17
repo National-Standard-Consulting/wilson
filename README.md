@@ -66,7 +66,7 @@ Verified against Mata v. Avianca (1:22-cv-01461, S.D.N.Y.) -- the most sanctione
 
 ### Windows (recommended for non-developers)
 
-Download `Wilson-Setup-0.0.5.exe` from the [releases page](https://github.com/CYoung83/wilson/releases).
+Download `Wilson-Setup-0.0.5.exe` from the [releases page](https://github.com/National-Standard-Consulting/wilson/releases).
 
 - No admin required -- installs to your user folder
 - No Python installation needed -- bundled runtime included
@@ -79,7 +79,7 @@ Download `Wilson-Setup-0.0.5.exe` from the [releases page](https://github.com/CY
 ### Linux / macOS
 
 ```bash
-git clone https://github.com/CYoung83/wilson.git
+git clone https://github.com/National-Standard-Consulting/wilson.git
 cd wilson
 chmod +x setup.sh
 ./setup.sh
@@ -90,7 +90,7 @@ chmod +x setup.sh
 ### Manual setup
 
 ```bash
-git clone https://github.com/CYoung83/wilson.git
+git clone https://github.com/National-Standard-Consulting/wilson.git
 cd wilson
 python3 -m venv venv
 source venv/bin/activate
@@ -234,7 +234,7 @@ Open an issue before submitting a pull request.
 
 Named for the volleyball in *Cast Away* -- something real built under duress because survival required it. A thinking partner that keeps you sane when the system breaks down around you.
 
-Wilson is developed by [National Standard Consulting LLC](https://github.com/CYoung83), a Service-Disabled Veteran-Owned Small Business.
+Wilson is developed by [National Standard Consulting LLC](https://github.com/National-Standard-Consulting), a Service-Disabled Veteran-Owned Small Business.
 
 ---
 

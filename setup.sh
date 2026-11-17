@@ -5,7 +5,7 @@
 # Sets up Wilson on any Unix system (Linux, macOS).
 # Run once after cloning the repo:
 #
-#   git clone https://github.com/CYoung83/wilson.git
+#   git clone https://github.com/National-Standard-Consulting/wilson.git
 #   cd wilson
 #   chmod +x setup.sh
 #   ./setup.sh

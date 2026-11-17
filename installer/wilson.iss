@@ -8,7 +8,7 @@
 #define AppName "Wilson"
 #define AppVersion "0.1.1"
 #define AppPublisher "National Standard Consulting LLC"
-#define AppURL "https://github.com/CYoung83/wilson"
+#define AppURL "https://github.com/National-Standard-Consulting/wilson"
 #define PythonZip "python-3.13.12-embed-amd64.zip"
 
 [Setup]
