@@ -16,10 +16,10 @@ Tip: providing the proposition is what unlocks Phase 3. Without it Wilson checks
 1. Open `/upload`.
 2. Drop a PDF, DOCX, or TXT file. Wilson extracts every legal citation it finds.
 3. Review the extracted citations and the proposed propositions; edit or add propositions before running.
-4. Choose depth: existence + quotes, or the full three-phase pipeline.
+4. Choose depth: existence only, or the full three-phase pipeline. (Batch verification checks existence only; per-citation quote verification requires a single citation input. See `qa/CLAIMS_LEDGER.md` WIL-D5.)
 5. Run the batch and watch results stream in per citation.
 
-Document content is parsed locally; only citation strings go to CourtListener.
+Document content is parsed locally; only citation strings go to CourtListener, except on the Phase 3 semantic-fallback path (see [explanation](explanation.md)), which sends the proposition text to CourtListener search.
 
 ## Generate a report
 

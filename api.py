@@ -220,7 +220,7 @@ def check_csv_update_available() -> bool:
 app = FastAPI(
     title="Wilson",
     description="AI Reasoning Auditor -- Open-source legal citation verification",
-    version="0.1.0",
+    version="0.1.1",
     lifespan=lifespan,
 )
 
@@ -666,7 +666,7 @@ async def health():
         pass
     return {
         "status": "operational",
-        "version": "0.1.0",
+        "version": "0.1.1",
         "phases": {
             "phase1_api": {
                 "available": cl_available,
@@ -869,7 +869,7 @@ async def verify(request: VerifyRequest):
 
     result = {
         "citation": citation_text,
-        "version": "0.1.0",
+        "version": "0.1.1",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -1117,6 +1117,10 @@ async def parse_upload_file(file: UploadFile = File(...)):
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=f"Extraction failed: {e}")
+        # DocumentParser normalizes corrupted/encrypted/unsupported documents
+        # into RuntimeError with a user-actionable message. That is a client
+        # input problem (422), never a server fault (500). Unknown exceptions
+        # below stay 500 -- a real server bug must not hide behind a 4xx.
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {e}")
