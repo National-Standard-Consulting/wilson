@@ -296,14 +296,22 @@ class TestReportClaims:
         assert "<img src=x" not in html, "untrusted citation text renders unescaped"
         assert "&lt;img" in html
 
-    @pytest.mark.xfail(strict=True, reason="DEFECT WIL-D4: report never shows which Phase 3 "
-                       "backend produced a verdict; an embeddings-rank SUPPORTS and an "
-                       "opinion-reading SUPPORTS are indistinguishable on paper. Linear: file ticket.")
     def test_report_discloses_phase3_backend_per_verdict(self):
+        """WIL-D4 fixed: report rows disclose which Phase 3 backend produced the verdict."""
         req = self._req()
         req["citations"][0]["phase3_backend"] = "embeddings"
         html = client.post("/report/generate", json=req).text
         assert "embeddings" in html.lower()
+        assert "not full opinion analysis" in html.lower()
+
+    def test_phase3_samples_deterministically(self, world):
+        """WIL-D6 fixed: temperature 0 + fixed seed -- identical input, identical verdict."""
+        net = world(standard_routes())
+        verify(ROE, prop=TRUE_PROP)
+        gen = [c for c in net.calls if "/api/generate" in c["url"]][0]
+        opts = gen["json"]["options"]
+        assert opts["temperature"] == 0.0
+        assert opts["seed"] == 1234
 
 
 # ============================================================ Upload portal

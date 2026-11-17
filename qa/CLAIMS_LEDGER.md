@@ -25,9 +25,9 @@ Every claim Wilson makes about itself, and how it is evidenced. `tests/test_clai
 | ~~WIL-D1~~ | **FIXED 17 Nov** (defect-wil-d1-d2): unchecked quote now displays UNVERIFIED; test promoted from xfail to strict pass. |  |
 | ~~WIL-D2~~ | **FIXED 17 Nov** (defect-wil-d1-d2): bare coordinates are now EXISTS with a disclosed "no case name supplied" note; name comparison runs only when a name claim exists. |  |
 | WIL-D3 | "Document content never left this machine" | The Phase 3 embeddings fallback sends the proposition itself to CourtListener semantic search. The report footer and privacy docs are false on that path. Fix = opt-in fallback + honest footer (product decision pending). |
-| WIL-D4 | Report as evidence | The printed report never says which Phase 3 backend produced a verdict; an embeddings rank-match SUPPORTS is indistinguishable on paper from an opinion-reading SUPPORTS. |
+| ~~WIL-D4~~ | **FIXED 17 Nov** (defect-d4-d6-minors): report rows and the batch UI disclose the Phase 3 backend (embeddings and prose-fallback carry explicit weaker-evidence wording); xfail promoted. |  |
 | WIL-D5 | Batch depth "quotes" | `/batch/stream` always passes `quoted_text=None`: batch quote verification is a no-op label. Docs corrected 16 Nov; code needs the feature or the option removed. |
-| WIL-D6 | "Repeatably" | Phase 3 runs Ollama at temperature 0.1: verdicts can flip between runs. Repeatability claim needs temperature 0 (or disclosed variance). |
+| ~~WIL-D6~~ | **FIXED 17 Nov** (defect-d4-d6-minors): Phase 3 options now temperature 0.0 + seed 1234; test asserts the sampling config. |  |
 
 ## Live-only claims (need a CourtListener token; harness ready, execution blocked)
 
@@ -41,7 +41,7 @@ Every claim Wilson makes about itself, and how it is evidenced. `tests/test_clai
 ## What "reliably, repeatably, responsibly" means in this ledger
 
 - Reliably = the failure-mode tests (V2, V6, V10): the tool must degrade to explicit ERROR/SKIPPED/4xx, never to a confident wrong verdict.
-- Repeatably = V9 determinism now; L2 stability at token time; WIL-D6 is the open threat.
+- Repeatably = V9 determinism + WIL-D6 fixed (temperature 0, seed 1234); L2 empirical stability still runs at token time.
 - Responsibly = V8/data boundary (WIL-D3 is the open violation), V7 disclosure, and the privacy-flag behavior.
 
 A claim with no test in this file and no row above does not get published in README, docs, reports, or posts.
@@ -59,4 +59,4 @@ Adjudicated against live code; noise rejected (SSRF-on-hardcoded-URL, CSV path t
 
 Re-checked and found already-correct (sweep claims rejected): fail-closed ERROR verdicts on API/auth failure (proven by V2), case-name default guards, CSV lookup is in-memory equality.
 
-Deferred to Linear (low severity, single-user local context): `.env` concurrent-write race; undisclosed opinion truncation in Phase 3 context; prose-fallback verdict extraction labeling; bulk CSV download lacks checksum verification; proposition-suggestion fallback should be labeled LOW confidence.
+Deferred minors (NAT-695) resolved 17 Nov on defect-d4-d6-minors: `.env` read-modify-write now file-locked (fcntl/msvcrt); opinion truncation disclosed in Phase 3 reasoning + `opinion_truncated` flag; prose-fallback labeled `ollama(prose-fallback)`, LOW cap, weaker-evidence wording; proposition-suggestion fallback labeled LOW with edit-before-use note. **Still deferred:** bulk CSV checksum -- CourtListener publishes no stable checksum for the daily files and S3 ETags are multipart (not MD5); revisit if they publish one.

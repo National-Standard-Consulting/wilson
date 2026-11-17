@@ -382,7 +382,10 @@ JSON RESPONSE:"""
                 "format": "json",
                 "stream": False,
                 "options": {
-                    "temperature": 0.1,
+                    # WIL-D6: determinism. temperature 0 + fixed seed so identical
+                    # input produces an identical verdict -- the repeatability claim.
+                    "temperature": 0.0,
+                    "seed": 1234,
                     "num_predict": 1024,
                     "num_ctx": OLLAMA_CONTEXT_SIZE,
                     "think": False   # Disable Qwen3/hybrid thinking mode -- JSON goes to response field
@@ -428,13 +431,17 @@ JSON RESPONSE:"""
 
         if json_str:
             result = json.loads(json_str)
-            return {
+            out = {
                 "verdict": result.get("verdict", "UNCERTAIN"),
                 "confidence": result.get("confidence", "LOW"),
                 "reasoning": result.get("reasoning", "No reasoning provided"),
                 "thinking": thinking,
                 "backend_used": "ollama"
             }
+            if was_truncated:
+                out["opinion_truncated"] = True
+                out["reasoning"] += " (NOTE: opinion was truncated to fit the model context; dissenting/concurring language may have been omitted.)"
+            return out
 
         # Fallback: extract verdict from prose
         print(f"  [COHERENCE] JSON parse failed, attempting prose extraction...")
@@ -442,13 +449,16 @@ JSON RESPONSE:"""
 
         if fallback_verdict:
             reasoning_snippet = raw_response.strip()[:400]
-            return {
+            out = {
                 "verdict": fallback_verdict,
                 "confidence": "LOW",
-                "reasoning": f"[Extracted from prose] {reasoning_snippet}",
+                "reasoning": f"[Extracted from prose -- model did not return structured JSON; verdict inferred from wording, treat as weaker evidence] {reasoning_snippet}",
                 "thinking": thinking,
-                "backend_used": "ollama"
+                "backend_used": "ollama(prose-fallback)"
             }
+            if was_truncated:
+                out["opinion_truncated"] = True
+            return out
 
         return {
             "verdict": "ERROR",
