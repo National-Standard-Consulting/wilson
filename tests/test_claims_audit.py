@@ -176,12 +176,13 @@ class TestPhase1Claims:
         world(standard_routes(lookup=TimeoutError("read timeout")))
         assert verify(ROE)["phase1"]["verdict"] == "ERROR"
 
-    @pytest.mark.xfail(strict=True, reason="DEFECT WIL-D2: bare coordinate citation with real "
-                       "coordinates gets MISATTRIBUTED (false accusation) because case-name "
-                       "matching runs against the raw coordinate string. Linear: file ticket.")
     def test_bare_coordinates_with_real_hit_verdict_exists(self, world):
+        """WIL-D2 fixed: a bare coordinate citation makes no name claim; a real
+        hit is EXISTS with a disclosed no-name-supplied note, not MISATTRIBUTED."""
         world(standard_routes())
-        assert verify(BARE_COORDS)["phase1"]["verdict"] == "EXISTS"
+        out = verify(BARE_COORDS)
+        assert out["phase1"]["verdict"] == "EXISTS"
+        assert "no case name supplied" in out["phase1"]["message"]
 
     def test_low_confidence_name_match_produces_suggestion_not_verdict(self, world):
         world(standard_routes(name_search={"count": 1, "results": [{
@@ -207,13 +208,12 @@ class TestPhase2Claims:
         world(standard_routes())
         assert verify(ROE, quote=FAKE_QUOTE)["phase2"]["display_verdict"] == "NOT FOUND"
 
-    @pytest.mark.xfail(strict=True, reason="DEFECT WIL-D1: opinion-fetch failure (ERROR) maps to "
-                       "display_verdict NOT FOUND -- an unchecked quote is reported as a fabricated "
-                       "quote. Linear: file ticket.")
     def test_unfetchable_opinion_is_not_reported_as_not_found(self, world):
+        """WIL-D1 fixed: unchecked quote displays UNVERIFIED, not an accusation."""
         world(standard_routes(opinion_status=500))
         out = verify(ROE, quote=REAL_QUOTE)
-        assert out["phase2"].get("display_verdict") != "NOT FOUND"
+        assert out["phase2"]["verdict"] == "ERROR"
+        assert out["phase2"]["display_verdict"] == "UNVERIFIED"
 
 
 # ================================================================ Phase 3

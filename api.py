@@ -521,12 +521,20 @@ async def run_pipeline(
         yield make_event("done", duration=round(time.time() - start_time, 2))
         return
 
-    # Case name verification
+    # Case name verification.
+    # WIL-D2: run the comparison only when the input actually contained a case
+    # name. A bare coordinate citation ("410 U.S. 113") makes no case-name
+    # claim; comparing coordinates against the database case name would
+    # produce a false MISATTRIBUTED accusation by construction.
     cited_name = extract_case_name(citation_text)
-    match_score, name_matches = verify_case_name(cited_name, actual_case_name)
-    match_pct = round(match_score)
+    name_supplied = cited_name.strip().lower() != citation_text.strip().lower()
+    if name_supplied:
+        match_score, name_matches = verify_case_name(cited_name, actual_case_name or "Unknown")
+        match_pct = round(match_score)
+    else:
+        match_score, name_matches, match_pct = None, True, None
 
-    if not name_matches:
+    if name_supplied and not name_matches:
         yield make_event("phase1_complete", data={
             "verdict": "MISATTRIBUTED",
             "cluster_id": cluster_id,
@@ -551,12 +559,15 @@ async def run_pipeline(
         "verdict": "EXISTS",
         "cluster_id": cluster_id,
         "case_name": actual_case_name,
-        "cited_name": cited_name,
+        "cited_name": cited_name if name_supplied else None,
         "match_pct": match_pct,
         "api_found": True,
         "local_csv": csv_stat,
         "privacy_protected": False,
-        "message": f"Citation verified -- {actual_case_name} ({match_pct}% name match)"
+        "message": (f"Citation verified -- {actual_case_name} ({match_pct}% name match)"
+                    if name_supplied else
+                    f"Citation coordinates verified -- {actual_case_name} "
+                    f"(no case name supplied, so no name comparison was performed)")
     })
     await asyncio.sleep(0)
 
@@ -574,9 +585,11 @@ async def run_pipeline(
                 "local_csv": csv_stat,
                 "privacy_protected": True,
                 "message": (
-                    f"Citation verified -- {actual_case_name} ({match_pct}% name match). "
-                    f"This opinion has been flagged for privacy protection. "
-                    f"Quote verification and coherence checking are not available."
+                    f"Citation verified -- {actual_case_name} "
+                    + (f"({match_pct}% name match). " if name_supplied
+                       else "(no case name supplied, so no name comparison was performed). ")
+                    + f"This opinion has been flagged for privacy protection. "
+                      f"Quote verification and coherence checking are not available."
                 )
             })
             yield make_event("done", duration=round(time.time() - start_time, 2))
@@ -596,6 +609,11 @@ async def run_pipeline(
             display_verdict = "100% MATCH"
         elif raw_verdict == "FUZZY_MATCH":
             display_verdict = f"{score_pct}% MATCH"
+        elif raw_verdict == "ERROR":
+            # WIL-D1: a quote we could not check must never be displayed as a
+            # fabricated quote. "Not found" is an accusation; "unverified" is
+            # the truth.
+            display_verdict = "UNVERIFIED"
         else:
             display_verdict = "NOT FOUND"
 

@@ -20,7 +20,7 @@ Input (citation text, case name, or uploaded document)
 |  PHASE 2: Quote Verification             |
 |  - Fetch full opinion text               |
 |  - Exact + fuzzy string match            |
-|  -> 100% MATCH / XX% MATCH / NOT FOUND   |
+|  -> 100% MATCH / XX% MATCH / NOT FOUND / UNVERIFIED   |
 +------------------------------------------+
               | (if proposition provided)
 +------------------------------------------+
@@ -55,6 +55,7 @@ Checks whether quoted language actually appears in the opinion.
 | `100% MATCH` | Quotation appears verbatim. |
 | `XX% MATCH` | Approximate match; paraphrase presented as quotation, or minor alteration. The percentage is the fuzzy similarity score. |
 | `NOT FOUND` | Quoted language does not appear in the opinion. |
+| `UNVERIFIED` | The opinion could not be retrieved or checked. This is *not* a finding about the quote -- nothing was verified. |
 
 ## Phase 3 -- Coherence
 

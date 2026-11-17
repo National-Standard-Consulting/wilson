@@ -42,7 +42,7 @@ Then open `http://localhost:8000`. Full requirements and troubleshooting: [insta
 Three phases, each with explicit verdicts:
 
 1. **Existence.** Extracts citations with [eyecite](https://github.com/freelawproject/eyecite), checks them against CourtListener (optionally a local 18M-record bulk CSV). Verdicts: `FABRICATED` / `MISATTRIBUTED` / `EXISTS`.
-2. **Quote verification.** Fetches the opinion and checks whether the quoted language actually appears, verbatim or approximately. Verdicts: `100% MATCH` / `XX% MATCH` / `NOT FOUND`.
+2. **Quote verification.** Fetches the opinion and checks whether the quoted language actually appears, verbatim or approximately. Verdicts: `100% MATCH` / `XX% MATCH` / `NOT FOUND` / `UNVERIFIED` (could not check -- not a finding about the quote).
 3. **Coherence.** Asks a local LLM via Ollama whether the cited case actually supports the proposition, with CourtListener semantic search as fallback. Verdicts: `SUPPORTS` / `DOES_NOT_SUPPORT` / `UNCERTAIN` / `SKIPPED`.
 
 Privacy: only citation strings are sent to CourtListener (exception: if the local model is down, the Phase 3 semantic fallback sends the proposition text to CourtListener search). Document content stays on your machine. Wilson respects CourtListener's privacy-removal flags and skips phases for blocked opinions.

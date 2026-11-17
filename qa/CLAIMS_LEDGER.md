@@ -22,8 +22,8 @@ Every claim Wilson makes about itself, and how it is evidenced. `tests/test_clai
 
 | ID | Claim affected | Defect |
 |---|---|---|
-| WIL-D1 | "NOT FOUND flags false quotes" | Opinion-fetch failure (ERROR) renders as display verdict NOT FOUND: an unchecked quote is reported as a fabricated quote. False-accusation class. |
-| WIL-D2 | "Catches misattributed citations" | A bare coordinate citation (`410 U.S. 113`, no case name) that resolves is accused MISATTRIBUTED, because name-matching compares the coordinate string to the case name. |
+| ~~WIL-D1~~ | **FIXED 17 Nov** (defect-wil-d1-d2): unchecked quote now displays UNVERIFIED; test promoted from xfail to strict pass. |  |
+| ~~WIL-D2~~ | **FIXED 17 Nov** (defect-wil-d1-d2): bare coordinates are now EXISTS with a disclosed "no case name supplied" note; name comparison runs only when a name claim exists. |  |
 | WIL-D3 | "Document content never left this machine" | The Phase 3 embeddings fallback sends the proposition itself to CourtListener semantic search. The report footer and privacy docs are false on that path. Fix = opt-in fallback + honest footer (product decision pending). |
 | WIL-D4 | Report as evidence | The printed report never says which Phase 3 backend produced a verdict; an embeddings rank-match SUPPORTS is indistinguishable on paper from an opinion-reading SUPPORTS. |
 | WIL-D5 | Batch depth "quotes" | `/batch/stream` always passes `quoted_text=None`: batch quote verification is a no-op label. Docs corrected 16 Nov; code needs the feature or the option removed. |

@@ -632,6 +632,8 @@
         if (['EXISTS','SUPPORTS'].includes(v) || v.includes('MATCH')) return 'v-green';
         if (['FABRICATED','DOES_NOT_SUPPORT','NOT_FOUND'].includes(v)) return 'v-red';
         if (['MISATTRIBUTED','UNCERTAIN'].includes(v)) return 'v-orange';
+        if (['ERROR','UNVERIFIED','SKIPPED'].includes(v)) return 'v-orange';
+        if (v === 'NOT FOUND') return 'v-red';
         return 'v-grey';
     }
 
