@@ -4,7 +4,7 @@
 # Sets up Wilson on Windows with PowerShell 5.1 or later.
 # Run once after cloning the repo:
 #
-#   git clone https://github.com/CYoung83/wilson.git
+#   git clone https://github.com/National-Standard-Consulting/wilson.git
 #   cd wilson
 #   Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 #   .\setup.ps1
@@ -116,7 +116,9 @@ if (-not $tokenValue -or $tokenValue -eq "your_courtlistener_token_here") {
     Write-Warn "CourtListener API token required for Wilson to function."
     Write-Info "Get yours free at: https://www.courtlistener.com/sign-in/"
     Write-Host ""
-    $input = Read-Host "  Enter your CourtListener API token (or press Enter to skip)"
+    $secure = Read-Host "  Enter your CourtListener API token (or press Enter to skip)" -AsSecureString
+    $input = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+        [Runtime.InteropServices.Marshal]::SecureStringToGlobalAllocUnicode($secure))
     if ($input.Trim()) {
         $envContent = $envContent -replace "COURTLISTENER_TOKEN=.*", "COURTLISTENER_TOKEN=$($input.Trim())"
         Set-Content $ENV_FILE $envContent -NoNewline

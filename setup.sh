@@ -5,7 +5,7 @@
 # Sets up Wilson on any Unix system (Linux, macOS).
 # Run once after cloning the repo:
 #
-#   git clone https://github.com/CYoung83/wilson.git
+#   git clone https://github.com/National-Standard-Consulting/wilson.git
 #   cd wilson
 #   chmod +x setup.sh
 #   ./setup.sh
@@ -103,7 +103,8 @@ if [ -z "$CL_TOKEN" ] || [ "$CL_TOKEN" = "your_courtlistener_token_here" ]; then
     echo -e "${YELLOW}  CourtListener API token required for Wilson to function.${NC}"
     echo -e "  Get yours free at: ${BLUE}https://www.courtlistener.com/sign-in/${NC}"
     echo ""
-    read -rp "  Enter your CourtListener API token (or press Enter to skip): " CL_TOKEN_INPUT
+    printf "  Enter your CourtListener API token (or press Enter to skip): "
+    read -rs CL_TOKEN_INPUT; echo
 
     if [ -n "$CL_TOKEN_INPUT" ]; then
         # Replace the placeholder in .env

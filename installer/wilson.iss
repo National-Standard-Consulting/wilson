@@ -8,7 +8,7 @@
 #define AppName "Wilson"
 #define AppVersion "0.1.1"
 #define AppPublisher "National Standard Consulting LLC"
-#define AppURL "https://github.com/CYoung83/wilson"
+#define AppURL "https://github.com/National-Standard-Consulting/wilson"
 #define PythonZip "python-3.13.12-embed-amd64.zip"
 
 [Setup]
@@ -156,7 +156,7 @@ Filename: "{app}\Wilson.bat"; \
 
 [UninstallRun]
 Filename: "powershell.exe"; \
-  Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force"""; \
+  Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Get-Process python -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '{app}\python\*' } | Stop-Process -Force"""; \
   RunOnceId: "KillWilson"; \
   Flags: runhidden waituntilterminated
 
