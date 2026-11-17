@@ -87,6 +87,33 @@ def get_citations_df():
     return _citations_df
 
 
+import contextlib
+
+@contextlib.contextmanager
+def _env_lock():
+    """Exclusive lock around the .env read-modify-write (NAT-695 minor 1)."""
+    lock_path = ENV_PATH + ".lock"
+    lf = open(lock_path, "a+")
+    try:
+        try:
+            import fcntl
+            fcntl.flock(lf, fcntl.LOCK_EX)
+        except ImportError:
+            try:
+                import msvcrt
+                msvcrt.locking(lf.fileno(), msvcrt.LK_LOCK, 1)
+            except Exception:
+                pass  # platform without advisory locks: single-user local tool
+        yield
+    finally:
+        try:
+            import fcntl
+            fcntl.flock(lf, fcntl.LOCK_UN)
+        except Exception:
+            pass
+        lf.close()
+
+
 def write_env_value(key: str, value: str) -> bool:
     """
     Update a single key=value pair in the .env file.
@@ -640,7 +667,8 @@ async def run_pipeline(
             "verdict": result.get("verdict", "ERROR"),
             "confidence": result.get("confidence"),
             "reasoning": result.get("reasoning", ""),
-            "backend_used": result.get("backend_used")
+            "backend_used": result.get("backend_used"),
+            "opinion_truncated": bool(result.get("opinion_truncated"))
         })
         await asyncio.sleep(0)
 

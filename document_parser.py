@@ -363,6 +363,8 @@ def suggest_proposition(citation_text: str, context_snippet: str) -> dict:
         "proposition": context_snippet,
         "backend_used": "fallback",
         "raw_snippet": context_snippet,
+        "confidence": "LOW",
+        "note": "Local model unavailable -- this is the raw context snippet, not a generated analysis. Edit before relying on it.",
     }
 
     try:

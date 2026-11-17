@@ -100,6 +100,7 @@
                 {% elif v3 == 'SKIPPED' %}<span class="v-grey">SKIPPED</span>
                 {% elif v3 == 'ERROR' %}<span class="v-orange">P3 ERROR</span>
                 {% else %}<span class="v-grey">{{ v3 }}</span>{% endif %}
+                {% if c.phase3_backend %}<div style="font-size:0.72em;color:#6b7280;margin-top:2px;">via {{ c.phase3_backend }}{% if c.phase3_backend == 'embeddings' %} &mdash; semantic rank, not full opinion analysis{% elif c.phase3_backend == 'ollama(prose-fallback)' %} &mdash; prose extraction, weaker evidence{% endif %}</div>{% endif %}
             </td>
             <td class="reasoning" title="{{ c.phase1_reasoning or '' }}">
                 {{ c.phase1_reasoning | default('', true) }}{% if c.matched_passage %} &mdash; "{{ c.matched_passage[:80] }}"{% endif %}
