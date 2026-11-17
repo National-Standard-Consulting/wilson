@@ -1,14 +1,5 @@
+.claude/
 venv/
 .env
-data/
 __pycache__/
 *.pyc
-*.pyo
-.DS_Store
-
-installer/*.exe
-installer/python-*.zip
-
-# IDE state
-.idea/
-.serena/
