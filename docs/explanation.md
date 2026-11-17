@@ -18,7 +18,7 @@ A tool that collapses these into one "confidence score" cannot tell a court whic
 
 ## Why the data boundary is this shape
 
-Only citation strings are transmitted to CourtListener, with one disclosed exception: when the local model is unavailable, the Phase 3 semantic-search fallback sends the proposition text itself to CourtListener search. Document content is parsed locally, quotes are compared against retrieved opinion text, and Phase 3 runs against a local model by default. This is a deliberate legal-profession constraint: verification must be usable on material a firm cannot upload to a third party. The boundary is stated in every generated report so the audit trail itself records what left the machine (citation strings, plus proposition text on the semantic-fallback path).
+Only citation strings are transmitted to CourtListener. If the local model is unavailable, Phase 3 is skipped by default. The semantic-search fallback that sends proposition text to CourtListener exists but is **opt-in and off by default** (Settings panel or `WILSON_EMBEDDINGS_FALLBACK=1`); turning it on is a deliberate crossing of the boundary, disclosed in every affected verdict. Document content is parsed locally, quotes are compared against retrieved opinion text, and Phase 3 runs against a local model by default. This is a deliberate legal-profession constraint: verification must be usable on material a firm cannot upload to a third party. The boundary is stated in every generated report so the audit trail itself records what left the machine (citation strings, plus proposition text only if you explicitly enable the semantic fallback).
 
 ## Why CourtListener and eyecite
 
