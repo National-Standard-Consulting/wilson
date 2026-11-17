@@ -1,0 +1,3 @@
+# Report/upload templates are app templates, not authored HTML pages;
+# keep the language bar honest.
+templates/*.html linguist-documentation
