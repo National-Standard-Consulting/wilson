@@ -1003,7 +1003,7 @@ async def generate_report(request: Request, report_req: ReportRequest):
     - Header: Wilson version, timestamp, SHA-256, filename, citation count
     - Body: one row per citation with phase-qualified verdicts
     - Summary block: totals per verdict class
-    - Footer: data-boundary statement + DATUM sentence
+    - Footer: data-boundary statement
     """
     # Compute summary counts per phase
     p1_counts = {}
