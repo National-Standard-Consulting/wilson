@@ -1,0 +1,47 @@
+# Quality gates cloned from the Nautilus proven shape (skill: ci-gate-rollout):
+# ruff full-tree baseline reporting, changed-lines ratchet gate, bandit at HIGH
+# severity only, pip-audit on the pinned dependency set. Tests are headless and
+# live in ci.yml (3.12 / 3.13) -- this job runs no server and no live backend.
+name: quality-gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install gate tools (pinned to the fleet baseline versions)
+        run: pip install ruff==0.17.0 bandit==1.9.4 pip-audit==2.9.0
+
+      - name: "Ruff full tree (baseline reporting, gate is on changed lines)"
+        run: ruff check . --statistics
+        continue-on-error: true
+
+      - name: "Ruff changed lines only (no new findings on the diff)"
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=100
+          python scripts/lint_gate.py "origin/${{ github.base_ref }}"
+
+      - name: "Bandit shipped modules (HIGH severity fails the build)"
+        # MEDIUM/LOW are baseline-visible in the step log; the gate is
+        # "no HIGH findings", matching the Nautilus ledger policy.
+        run: bandit -q --severity-level high -r api.py quote_verify.py coherence_check.py document_parser.py charlotin_processor.py
+
+      - name: "pip-audit (known vulnerabilities in the pinned set fail the build)"
+        # Cleared 16 Nov 26: pypdf 7.1.0 / python-multipart 0.0.34 / uvicorn
+        # 0.54.0 / fastapi 0.163.1 after a 79-vulnerability finding. Any new
+        # known CVE in requirements.txt now bounces the PR.
+        run: pip-audit -r requirements.txt
