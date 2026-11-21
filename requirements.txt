@@ -17,7 +17,7 @@ rapidfuzz
 pandas==3.0.2
 
 # Environment variable management
-python-dotenv==1.2.2
+python-dotenv==1.2.4
 
 # Hugging Face (CAP dataset access)
 huggingface_hub
