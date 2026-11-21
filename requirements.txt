@@ -2,7 +2,7 @@
 # Install with: pip install -r requirements.txt
 
 # Citation extraction
-eyecite==2.7.6
+eyecite==2.7.8
 
 # HTTP requests
 requests==2.33.1
